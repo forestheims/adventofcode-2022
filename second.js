@@ -29,3 +29,49 @@ for (let round of rounds) {
 
 console.log('total', total);
 
+let newTotal = 0;
+
+function playScore(elf, result) {
+    let play = 0;
+    if(elf === 'A') {
+         if (result === 'X') {
+            play = play + 3;
+        } else if (result === 'Z') {
+            play = play + 2;
+    }
+    }
+
+    if (elf === 'B') {
+        if (result === 'X') {
+            play = play + 1;
+        } else if (result === 'Z') {
+            play = play + 3;
+    }
+    }
+
+    if (elf === 'C') {
+        if (result === 'X') {
+            play = play + 2;
+        } else if (result === 'Z') {
+            play = play + 1;
+    }
+}
+    return play;
+}
+
+for (let round of rounds) {
+    const [elf, result] = round.split(' ');
+    if(result === 'X') {
+        newTotal = newTotal + playScore(elf, result);
+    }
+
+    if (result === 'Y') {
+        newTotal = newTotal + 3 + score[elf];
+    }
+
+    if (result === 'Z') {
+        newTotal = newTotal + 6 + playScore(elf, result);
+}
+}
+
+console.log('newTotal', newTotal)
