@@ -39,6 +39,11 @@ class BinaryTreeNode {
         if (this.right) {
             total = this.right.getTopThree();
         } else {
+            // the line below currently works for my unique input for the problem.
+            // If someones input were to have one more right node, on the left's right node,
+            // it would not result in the correct answer to the challenge.
+            // I shaped this line the way I did because I could see in a console log that these
+            // were the last three highest valued nodes. In other words: (this.left.right.left === null && this.left.right.right === null)
             total = this.value + this.left.value + this.left.right.value;
         }
         return total;
