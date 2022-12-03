@@ -40,4 +40,43 @@ priorities.forEach((ind) => {
     totalPrior = totalPrior + ind[1];
 })
 
-console.log('totalPrior', totalPrior);
+// console.log('totalPrior', totalPrior);
+
+const groupsOfThree = rucksacks.map((string, index) => {
+    let item = '';
+    if (index % 3 === 0) {
+        let first = string.split('');
+        let second = rucksacks[index + 1].split('');
+        let third = rucksacks[index + 2].split('');
+        let firstLibrary = {};
+        let secondLibrary = {};
+        for (let letter of first) {
+            firstLibrary[letter] = letter;
+        }
+        for (let letter of second) {
+          secondLibrary[letter] = letter;
+        }
+        for (let letter of third) {
+            if(firstLibrary[letter] && secondLibrary[letter]) item = letter;
+        }
+    }
+    return item
+});
+
+// console.log('groupsOfThree', groupsOfThree);
+
+const groupPriorities = groupsOfThree.map((item) => {
+    const priorityValue = priorLibrary[item];
+    return priorityValue;
+})
+
+// console.log('priorities', priorities);
+
+let groupPrior = 0;
+
+groupPriorities.forEach((ind) => {
+    console.log('ind', ind)
+    if (ind) groupPrior = groupPrior + ind;
+})
+
+console.log('groupPrior', groupPrior);
