@@ -1,4 +1,5 @@
 const input = require('./input7.js');
+const util = require('util');
 
 
 let newInput = input.split('\n');
@@ -34,7 +35,9 @@ class Dir {
                     const newFile = new File(each);
                     this.files[each[1]] = newFile;
                     this.size = this.size + +each[0];
-                    if (this.value !== '/') this.parent.addToParents(+each[0]);
+                    if (this.value !== '/') {
+                        this.parent.addToParents(+each[0]);
+                    }
             }
             }
         })
@@ -42,15 +45,19 @@ class Dir {
 
     smallFolders() {
         let sumArr = [];
-        if (this.size <= 100000) {
-            sumArr.push(this);
-        }
-        let more = Object.keys(this.subDirs).map(each => {
-            return this.subDirs[each].smallFolders();
+
+        let keys = Object.keys(this.subDirs);
+        keys.forEach(each => {
+            const obj = this.subDirs[each];
+            if (obj.size <= 100000) {
+                sumArr.push(obj);
+            };
+            obj.smallFolders().forEach(eachSub => {
+                sumArr.push(eachSub);
+            });
         })
-        sumArr.push(more);
-        // console.log('more', more);
-        return sumArr.flat(9);
+
+        return sumArr;
     }
 
     addToParents(size) {
@@ -69,17 +76,21 @@ newInput.forEach((each, index, self) => {
         if (each[1] === 'cd') {
             if (each[2] === '..') {
                 pointer = pointer.parent
-                // console.log('pointer', pointer)
-            } else if (!pointer[each[2]]) {
+            } else if (each[2] === '/') {
+                pointer = root;
+            } else if (!pointer.subDirs[each[2]]) {
+                // if folder doesn't exist, create it
                 const newDir = new Dir(each[2], pointer)
                 pointer.subDirs[each[2]] = newDir;
                 pointer = newDir;
+            } else {
+                // folder exists, change pointer
+                pointer = pointer.subDirs[each[2]]
             }
             lsArr = [];
         } else if (each[1] === 'ls') {
             let lsIndex = index + 1;
                 do {
-                    // console.log('lsIndex', lsIndex)
                     lsArr.push(self[lsIndex]);
                     lsIndex++;
                 } while (self[lsIndex + 1] && self[lsIndex + 1][0] !== '$' && self[lsIndex + 1][0] !== 'cd' && self[lsIndex + 1][0] !== 'ls');
@@ -89,12 +100,13 @@ newInput.forEach((each, index, self) => {
     } 
 })
 
-// console.log('root', root)
+// console.log('root', util.inspect(root, {showHidden: false, depth: null, colors: true}))
 
-// console.log('root.smallFolders()', root.smallFolders())
+console.log('root.smallFolders()', root.smallFolders().map(each => each.value)) 
 
 let answer = 0;
 root.smallFolders().forEach((each) => {
+    // console.log('each', each)
     answer = answer + each.size;
 })
 console.log('ans', answer)
