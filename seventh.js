@@ -1,46 +1,34 @@
 const input = require('./input7.js');
-const util = require('util');
 
 
 let newInput = input.split('\n');
 newInput = newInput.map(t => t.split(' '));
 
-// console.log('input', newInput);
 
 class File {
-    constructor([size, name]) {
+    constructor(name, size) {
         this.name = name;
         this.size = +size;
     }
 }
 
 class Dir {
-    constructor(string, parent) {
-        this.value = string;
+    constructor(name, parent) {
+        this.value = name;
         this.parent = parent;
         this.subDirs = {};
         this.files = {};
         this.size = 0;
     }
 
-    ls(array) {
-        array.forEach((each) => {
-            if(each[0] === 'dir') {
-                if (!this.subDirs[each[1]]) {
-                    const newDir = new Dir(each[1], this);
-                    this.subDirs[each[1]] = newDir;
-                }
-            } else {
-                if (!this.files[each[1]]) {
-                    const newFile = new File(each);
-                    this.files[each[1]] = newFile;
-                    this.size = this.size + +each[0];
-                    if (this.value !== '/') {
-                        this.parent.addToParents(+each[0]);
-                    }
-            }
-            }
-        })
+    addDir(name, par) {
+        const subDir = new Dir(name + '/', par);
+        par.subDirs[name + '/'] = subDir;
+    }
+
+    addFile(name, size) {
+        const file = new File(name, +size);
+        this.files[name] = file;
     }
 
     smallFolders() {
@@ -56,59 +44,56 @@ class Dir {
                 sumArr.push(eachSub);
             });
         })
-
         return sumArr;
-    }
-
-    addToParents(size) {
-        this.size = this.size + size;
-        if (this.parent !== 'root') {
-            this.parent.addToParents(size);
-        }
-    }
 }
-const root = new Dir('/', 'root')
-let pointer = root;
-let lsArr = [];
+}
 
-newInput.forEach((each, index, self) => {
-    if (each[0] === '$') {
-        if (each[1] === 'cd') {
-            if (each[2] === '..') {
-                pointer = pointer.parent
-            } else if (each[2] === '/') {
-                pointer = root;
-            } else if (!pointer.subDirs[each[2]]) {
-                // if folder doesn't exist, create it
-                const newDir = new Dir(each[2], pointer)
-                pointer.subDirs[each[2]] = newDir;
-                pointer = newDir;
+let lsMode = false;
+const root = new Dir('/', null);
+let pwd = root;
+let path = ['/']
+
+newInput.forEach(command => {
+    let inp = command[0];
+    let ins = command[1];
+    if (inp === '$') {
+        lsMode = false;
+        if (ins === 'ls') {
+            lsMode = true;
+        } else if (ins === 'cd') {
+            if (command[2] === '/') {
+                pwd = root;
+                path = ['/'];
+            } else if (command[2] === '..') {
+                pwd = pwd.parent;
+                path.pop();
             } else {
-                // folder exists, change pointer
-                pointer = pointer.subDirs[each[2]]
+                pwd = pwd.subDirs[command[2] + '/'];
+                path.push(command[2] + '/');
             }
-            lsArr = [];
-        } else if (each[1] === 'ls') {
-            let lsIndex = index + 1;
-                do {
-                    lsArr.push(self[lsIndex]);
-                    lsIndex++;
-                } while (self[lsIndex + 1] && self[lsIndex + 1][0] !== '$' && self[lsIndex + 1][0] !== 'cd' && self[lsIndex + 1][0] !== 'ls');
-            pointer.ls(lsArr);
-            lsArr = [];
         }
-    } 
+    } else if (lsMode && inp === 'dir') {
+        pwd.addDir(ins, pwd);
+    } else if (lsMode) {
+        pwd.addFile(ins, +inp)
+        if (pwd.value === '/') {
+            pwd.size = pwd.size + +inp;
+        } else {
+            pwd.size += +inp;
+            let parent = pwd.parent;
+            while(parent !== null) {
+                if (parent !== null) {
+                    parent.size += +inp;
+                    parent = parent.parent;
+                }
+            }
+        }
+    }
 })
 
-// console.log('root', util.inspect(root, {showHidden: false, depth: null, colors: true}))
+let result = 0;
+const resArr = root.smallFolders();
+resArr.forEach(repo => result += repo.size);
+console.log('result', result);
 
-console.log('root.smallFolders()', root.smallFolders().map(each => each.value)) 
-
-let answer = 0;
-root.smallFolders().forEach((each) => {
-    // console.log('each', each)
-    answer = answer + each.size;
-})
-console.log('ans', answer)
-
-// 1991257 (too high), 
+// 1991257 (too high), 1367870 (correct)
