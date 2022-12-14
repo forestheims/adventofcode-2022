@@ -45,7 +45,23 @@ class Dir {
             });
         })
         return sumArr;
-}
+    }
+    
+    middleFolders() {
+        let sumArr = [];
+
+        let keys = Object.keys(this.subDirs);
+        keys.forEach(each => {
+            const obj = this.subDirs[each];
+            if (obj.size <= 560000 && obj.size >= 528671) {
+                sumArr.push(obj);
+            };
+            obj.middleFolders().forEach(eachSub => {
+                sumArr.push(eachSub);
+            });
+        })
+        return sumArr;
+    }
 }
 
 let lsMode = false;
@@ -94,6 +110,19 @@ newInput.forEach(command => {
 let result = 0;
 const resArr = root.smallFolders();
 resArr.forEach(repo => result += repo.size);
-console.log('result', result);
+// console.log('result', result);
 
 // 1991257 (too high), 1367870 (correct)
+
+// console.log('root', root)
+
+const max = 70000000;
+const used = root.size;
+const free = max - used;
+const update = 30000000;
+const moreNeeded = update - free;
+console.log('used', used, 'free', free, 'more', moreNeeded)
+
+console.log('root', root.middleFolders()[0].size)
+
+// 549173
