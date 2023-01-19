@@ -15,13 +15,20 @@ arr = arr.map(r => {
 
 
 
-const aRealArray = arr.map((r,i) => r.map((s,j) => {
+const aRealArray = arr.map((r,i,b) => r.map((s,j,a) => {
         if (i == 0) return true;
         else if (i == 98) return true;
         else if (j == 0) return true;
         else if (j == 98) return true;
         else {
-            // logic
+            let cutoff = 0;
+            for (let h = 0; h<=j; h++) {
+                // if (cutoff < a[h]) cutoff = a[h];
+                if (s > cutoff) {
+                    cutoff = s
+                    return [s, a[h]];
+                } else return false;
+            }
         }
         return false;
     })
